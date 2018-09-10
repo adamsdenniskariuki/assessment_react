@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-const axios = require('axios');
+
+import { getMovies } from './requests';
 
 export class Search extends Component{
 
@@ -13,23 +14,18 @@ export class Search extends Component{
         this.search = this.search.bind(this);
     }
 
-    search(event) {
+    search = async (event) => {
         const input = document.getElementById("search").value;
         if (input.trim() !== ""){
             const url = `https://api.themoviedb.org/3/search/movie?api_key=f250169057aeeda23f31aace8ef2d93e&language=en-US&query=${input}&page=1&include_adult=false`;
 
-            axios.get(url)
-                .then((response) => {
-                    const movies = response.data;
-                    if(movies === null){
-                        alert("An error occurred with the request");
-                    } else {
-                        this.setState({ results: movies.results });
-                    }
-                })
-                .catch((error) => {
-                    return null;
-                })
+            const movies = await Promise.all([getMovies(url)]);
+
+            if (movies === null) {
+                alert("An error occurred with the request");
+            } else {
+                this.setState({ results: movies[0].results });
+            }
 
         } else {
             alert("search field is required.")
